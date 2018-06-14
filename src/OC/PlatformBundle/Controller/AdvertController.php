@@ -74,10 +74,23 @@ class AdvertController extends Controller
         if ($request->isMethod('POST')) {
         // Ici, on s'occupera de la création et de la gestion du formulaire
 
-        $request->getSession()->getFlashBag()->add('notice', 'Annonce bien enregistrée.');
+        // On récupère le service de spam
+        $antispam = $this->container->get('oc_platform.antispam');
 
-        // Puis on redirige vers la page de visualisation de cettte annonce
-        return $this->redirectToRoute('oc_platform_view', array('id' => 5));
+        // Je pars du principe que $text contient le texte d'un message quelconque
+        $text = '...';
+        if ($antispam->isSpam($text)) 
+        {
+        throw new \Exception('Votre message a été détecté comme spam !');
+        }
+        else
+        {
+            // Ici le message n'est pas un spam
+            $request->getSession()->getFlashBag()->add('notice', 'Annonce bien enregistrée.');
+
+            // Puis on redirige vers la page de visualisation de cettte annonce
+            return $this->redirectToRoute('oc_platform_view', array('id' => 5));
+        }
         }
 
         // Si on n'est pas en POST, alors on affiche le formulaire
