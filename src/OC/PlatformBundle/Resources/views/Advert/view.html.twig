@@ -16,7 +16,21 @@
     </div>
 
 
+    {% if advert.image is not null %}
+        <img src="{{ advert.image.url }}" alt="{{ advert.image.alt }}">
+    {% endif %}
+
     <h2>{{ advert.title }}</h2>
+
+    {% if not advert.categories.empty %}
+        <p>
+            Catégories de l'annonce :
+            {% for category in advert.categories %}
+            {{ category.name }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        </p>
+    {% endif %}
+
     <i>Par {{ advert.author }}, le {{ advert.date|date('d/m/Y') }}</i>
 
     <div class="well">
@@ -37,5 +51,14 @@
         Supprimer l'annonce
         </a>
     </p>
+
+
+    <h2>Applications</h2>
+
+    {% for application in listApplications %}
+        <i>Par {{ application.author }}, le {{ application.date|date('d/m/Y') }}</i>
+        <p class="well"> {{ application.content }}</p>
+    {% endfor %}
+
 
 {% endblock %}
