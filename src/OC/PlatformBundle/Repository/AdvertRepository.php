@@ -3,6 +3,7 @@
 namespace OC\PlatformBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * AdvertRepository
@@ -30,6 +31,22 @@ class AdvertRepository extends \Doctrine\ORM\EntityRepository
     // ;
     // }
 
+    public function getAdverts($page, $nbPerPage)
+    {
+        $query = $this->createQueryBuilder('a')
+            ->orderBy('a.date', 'DESC')
+            ->getQuery()
+        ;
+    
+        $query
+            ->setFirstResult(($page-1) * $nbPerPage)
+            ->setMaxResults($nbPerPage)
+        ;
+
+        return new Paginator($query, true);
+    }
+    
+
     public function findByAuthorAndDate($author, $year)
     {
         $qb = $this->createQueryBuilder('a');
@@ -46,6 +63,27 @@ class AdvertRepository extends \Doctrine\ORM\EntityRepository
             ->getResult()
         ;
     }
+
+    public function getAdvertWithCategories(array $categoryNames)
+    {
+        $qb = $this->createQueryBuilder('a');
+
+        // On fait une jointure avec l'entité Category avec pour alias « c »
+        $qb
+        ->innerJoin('a.categories', 'c')
+        ->addSelect('c')
+        ;
+
+        // Puis on filtre sur le nom des catégories à l'aide d'un IN
+        $qb->where($qb->expr()->in('c.name', $categoryNames));
+        // La syntaxe du IN et d'autres expressions se trouve dans la documentation Doctrine
+
+        // Enfin, on retourne le résultat
+        return $qb
+        ->getQuery()
+        ->getResult()
+        ;
+    }
     
     public function findAdvertsToPurge($days) 
     {
@@ -55,7 +93,7 @@ class AdvertRepository extends \Doctrine\ORM\EntityRepository
         
         $qb = $this ->createQueryBuilder('a');
         
-        $qb ->where('a.date < :date')
+        $qb ->where('a.updatedAt IS NOT NULL AND a.updatedAt < :date OR a.updatedAt IS NULL AND a.date < :date')
                 ->setParameter('date', $date)
             ->andWhere('a.applications IS EMPTY')
         ;

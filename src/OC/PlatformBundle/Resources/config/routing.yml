@@ -41,3 +41,8 @@ oc_platform_purge:
         days: 45
     requirements:
         days: \d+
+
+oc_platform_category:
+    path:      /category/{category}
+    defaults:
+        _controller: OCPlatformBundle:Advert:category

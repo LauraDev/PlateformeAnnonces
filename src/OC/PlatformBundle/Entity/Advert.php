@@ -4,26 +4,38 @@ namespace OC\PlatformBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * Advert
  *
  * @ORM\Table(name="oc_advert")
  * @ORM\Entity(repositoryClass="OC\PlatformBundle\Repository\AdvertRepository")
+ * @ORM\HasLifecycleCallbacks()
  */
 class Advert
 {   
-        /**
+    /**
     * @ORM\ManyToMany(targetEntity="OC\PlatformBundle\Entity\Category", cascade={"persist"})
     * @ORM\JoinTable(name="oc_advert_category")
     */
     private $categories;
 
     /**
-   * @ORM\OneToMany(targetEntity="OC\PlatformBundle\Entity\Application", cascade={"persist"}, mappedBy="advert")
-   */
+     * @ORM\OneToMany(targetEntity="OC\PlatformBundle\Entity\Application", cascade={"persist"}, mappedBy="advert")
+     */
     private $applications; // Notez le « s », une annonce est liée à plusieurs candidatures
 
+    /**
+     * @ORM\OneToMany(targetEntity="OC\PlatformBundle\Entity\AdvertSkill", cascade={"persist"}, orphanRemoval=true, mappedBy="advert")
+     */
+    private $advertSkills;
+
+    /**
+     * @ORM\OneToOne(targetEntity="OC\PlatformBundle\Entity\Image", cascade={"persist"})
+     */
+    private $image;
+    
     /**
      * @var int
      *
@@ -57,6 +69,13 @@ class Advert
     /**
      * @var string
      *
+     * @ORM\Column(name="authorEmail", type="string", length=255)
+     */
+    private $authorEmail;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="content", type="text")
      */
     private $content;
@@ -66,19 +85,29 @@ class Advert
      */
     private $published = true;
 
+    /**
+     * @ORM\Column(name="updated_at", type="datetime", nullable=true)
+     */
+    private $updatedAt;
+
+      /**
+     * @ORM\Column(name="nb_applications", type="integer")
+     */
+    private $nbApplications = 0;
+
+      /**
+     * @Gedmo\Slug(fields={"title"})
+     * @ORM\Column(name="slug", type="string", length=255, unique=true)
+     */
+    private $slug;
+
+
     public function __construct()
     {
-        // Par défaut, la date de l'annonce est la date d'aujourd'hui
         $this->date = new \Datetime();
-
         $this->categories = new ArrayCollection();
-
+        $this->applications = new ArrayCollection();
     }
-
-    /**
-     * @ORM\OneToOne(targetEntity="OC\PlatformBundle\Entity\Image", cascade={"persist"})
-     */
-    private $image;
 
 
     /**
@@ -305,5 +334,159 @@ class Advert
     public function getApplications()
     {
         return $this->applications;
+    }
+
+    /**
+     * Add advertSkill
+     *
+     * @param \OC\PlatformBundle\Entity\AdvertSkill $advertSkill
+     *
+     * @return Advert
+     */
+    public function addAdvertSkill(\OC\PlatformBundle\Entity\AdvertSkill $advertSkill)
+    {
+        $this->advertSkills[] = $advertSkill;
+
+        // On lie l'annonce à l'advertSkill
+        $advertSkill->setAdvert($this);
+
+        return $this;
+    }
+
+    /**
+     * Remove advertSkill
+     *
+     * @param \OC\PlatformBundle\Entity\AdvertSkill $advertSkill
+     */
+    public function removeAdvertSkill(\OC\PlatformBundle\Entity\AdvertSkill $advertSkill)
+    {
+        $this->advertSkills->removeElement($advertSkill);
+    }
+
+    /**
+     * Get advertSkills
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    
+    public function getAdvertSkills()
+    {
+        return $this->advertSkills;
+    }
+    
+    /**
+     * Set updatedAt
+     *
+     * @param \DateTime $updatedAt
+     *
+     * @return Advert
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * Get updatedAt
+     *
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @ORM\PreUpdate
+     */
+    public function updateDate()
+    {
+        $this->setUpdatedAt(new \Datetime());
+    }
+
+
+
+    public function increaseApplication()
+    {
+        $this->nbApplications++;
+    }
+
+    public function decreaseApplication()
+    {
+        $this->nbApplications--;
+    }
+
+    /**
+     * Set nbApplications
+     *
+     * @param integer $nbApplications
+     *
+     * @return Advert
+     */
+    public function setNbApplications($nbApplications)
+    {
+        $this->nbApplications = $nbApplications;
+
+        return $this;
+    }
+
+    /**
+     * Get nbApplications
+     *
+     * @return integer
+     */
+    public function getNbApplications()
+    {
+        return $this->nbApplications;
+    }
+
+    /**
+     * Set authorEmail
+     *
+     * @param string $authorEmail
+     *
+     * @return Advert
+     */
+    public function setAuthorEmail($authorEmail)
+    {
+        $this->authorEmail = $authorEmail;
+
+        return $this;
+    }
+
+    /**
+     * Get authorEmail
+     *
+     * @return string
+     */
+    public function getAuthorEmail()
+    {
+        return $this->authorEmail;
+    }
+
+    /**
+     * Set slug
+     *
+     * @param string $slug
+     *
+     * @return Advert
+     */
+    public function setSlug($slug)
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
+    /**
+     * Get slug
+     *
+     * @return string
+     */
+    public function getSlug()
+    {
+        return $this->slug;
     }
 }

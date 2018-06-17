@@ -33,14 +33,21 @@
             <div id="menu" class="col-md-3">
                 <h3>Accueil</h3>
                     <ul class="nav nav-pills nav-stacked">
-                    <li><a href="{{ path('oc_core_home') }}">Accueil</a></li>
-                    <li><a href="{{ path('oc_core_contact') }}">Contact</a></li>
-                    <li><a href="{{ path('oc_platform_purge') }}">Purge</a></li>
+                        <li><a href="{{ path('oc_core_home') }}">Accueil</a></li>
+                        <li><a href="{{ path('oc_core_contact') }}">Contact</a></li>
+                        <li><a href="{{ path('oc_platform_purge') }}">Purge</a></li>
                     </ul>
                 <h3>Les annonces</h3>
                 <ul class="nav nav-pills nav-stacked">
-                <li><a href="{{ path('oc_platform_home') }}">Accueil</a></li>
-                <li><a href="{{ path('oc_platform_add') }}">Ajouter une annonce</a></li>
+                    <li><a href="{{ path('oc_platform_home') }}">Accueil</a></li>
+                    <li><a href="{{ path('oc_platform_add') }}">Ajouter une annonce</a></li>
+                    
+                    <li class="dropdown">
+                        <a data-toggle="dropdown">Catégories</a>
+                        {{ render(controller("OCPlatformBundle:Advert:allCategories")) }}
+                    </li>
+
+
                 </ul>
 
                 <h4>Dernières annonces</h4>

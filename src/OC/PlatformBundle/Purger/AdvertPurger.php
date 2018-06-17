@@ -1,11 +1,11 @@
 <?php
-// src/OC/PlatformBundle/Antispam/OCPurge.php
+// src/OC/PlatformBundle/Purger/AdvertPurger.php
 
-namespace OC\PlatformBundle\Purge;
+namespace OC\PlatformBundle\Purger;
 
 use OC\PlatformBundle\Entity\Advert;
 
-class OCPurge
+class AdvertPurger
 {
     private $_em;
 
@@ -27,6 +27,11 @@ class OCPurge
         ;
         
         $adsToPurge = $repository->findAdvertsToPurge($days);
+
+        foreach ($adsToPurge as $toPurge) {
+            $this->_em->remove($toPurge);
+        }
+        $this->_em->flush();
         return $adsToPurge;
 
     }

@@ -7,6 +7,9 @@ use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use OC\PlatformBundle\Entity\Advert;
 use OC\PlatformBundle\Entity\Application;
+use OC\PlatformBundle\Entity\AdvertSkill;
+use OC\PlatformBundle\Entity\Skill;
+use OC\PlatformBundle\Entity\Image;
 
 class LoadAdvert implements FixtureInterface
 {
@@ -18,7 +21,7 @@ class LoadAdvert implements FixtureInterface
             array(
                 new \DateTime('2017-06-16 16:24:02'), 
                 'Developer Symfony', 
-                'Jane Doe', 
+                'Jane Doe',
                 'Ceci est une annonce de ...'
             ),
             array(
@@ -41,6 +44,10 @@ class LoadAdvert implements FixtureInterface
             )
         );
 
+        $skill = new Skill();
+        $skill->setName('Indesign');
+        $manager->persist($skill);
+
         foreach ($ads as $key=>$ad) {
         // On crée la catégorie
             $advert = new Advert();
@@ -48,6 +55,7 @@ class LoadAdvert implements FixtureInterface
             $advert->setTitle($ad[1]);
             $advert->setAuthor($ad[2]);
             $advert->setContent($ad[3]);
+            $advert->setAuthorEmail('loles34_4@hotmail.com');
 
             if($key % 2 === 1) {
                 // Création d'une première candidature
@@ -58,7 +66,21 @@ class LoadAdvert implements FixtureInterface
 
                 // On lie les candidatures à l'annonce
                 $advert->addApplication($application);
+
             }
+            // Creation de l'entite image
+            $image = new Image();
+            $image-> setUrl('http://sdz-upload.s3.amazonaws.com/prod/upload/job-de-reve.jpg');
+            $image-> setAlt('Job de reve!');
+            
+            // Relation image - annonce
+            $advert-> setImage($image);
+
+            $advertSkill = new AdvertSkill();
+            $advertSkill->setLevel('Junior');
+            $advertSkill->setSkill($skill);
+
+            $advert->addAdvertSkill($advertSkill);
 
             // On la persiste
             $manager->persist($advert);

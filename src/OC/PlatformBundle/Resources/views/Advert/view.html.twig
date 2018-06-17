@@ -55,7 +55,7 @@
 
     <h2>Applications</h2>
 
-    {% for application in listApplications %}
+    {% for application in advert.applications() %}
         <i>Par {{ application.author }}, le {{ application.date|date('d/m/Y') }}</i>
         <p class="well"> {{ application.content }}</p>
     {% endfor %}

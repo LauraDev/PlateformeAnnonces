@@ -1,0 +1,11 @@
+<ul class="dropdown-menu">
+    {% for category in categories %}
+        <li class="dropdown-item">
+            <a href="{{ path('oc_platform_category', {'category': category.name}) }}">
+            {{ category.name }}
+            </a>
+        </li>
+    {% else %}
+        <li class="dropdown-item">Pas (encore !) de catégories</li>
+    {% endfor %}
+</ul>
