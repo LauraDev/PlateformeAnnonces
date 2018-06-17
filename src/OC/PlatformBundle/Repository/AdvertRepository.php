@@ -2,6 +2,8 @@
 
 namespace OC\PlatformBundle\Repository;
 
+use Doctrine\ORM\EntityRepository;
+
 /**
  * AdvertRepository
  *
@@ -10,4 +12,57 @@ namespace OC\PlatformBundle\Repository;
  */
 class AdvertRepository extends \Doctrine\ORM\EntityRepository
 {
+    // public function myFindAll()
+    // {
+    //     $queryBuilder = $this->createQueryBuilder('a');
+    //     $query = $queryBuilder->getQuery();
+    //     $results = $query->getResult();
+    //     return $results;
+    // }
+
+
+    // public function myFindAll()
+    // {
+    // return $this
+    //     ->createQueryBuilder('a')
+    //     ->getQuery()
+    //     ->getResult()
+    // ;
+    // }
+
+    public function findByAuthorAndDate($author, $year)
+    {
+        $qb = $this->createQueryBuilder('a');
+
+        $qb->where('a.author = :author')
+            ->setParameter('author', $author)
+            ->andWhere('a.date < :year')
+            ->setParameter('year', $year)
+            ->orderBy('a.date', 'DESC')
+        ;
+
+        return $qb
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+    
+    public function findAdvertsToPurge($days) 
+    {
+        $date = new \DateTime();
+        date_modify($date, '-'. $days .'day');
+
+        
+        $qb = $this ->createQueryBuilder('a');
+        
+        $qb ->where('a.date < :date')
+                ->setParameter('date', $date)
+            ->andWhere('a.applications IS EMPTY')
+        ;
+
+        return $qb    
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

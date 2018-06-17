@@ -12,7 +12,18 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @ORM\Entity(repositoryClass="OC\PlatformBundle\Repository\AdvertRepository")
  */
 class Advert
-{
+{   
+        /**
+    * @ORM\ManyToMany(targetEntity="OC\PlatformBundle\Entity\Category", cascade={"persist"})
+    * @ORM\JoinTable(name="oc_advert_category")
+    */
+    private $categories;
+
+    /**
+   * @ORM\OneToMany(targetEntity="OC\PlatformBundle\Entity\Application", cascade={"persist"}, mappedBy="advert")
+   */
+    private $applications; // Notez le « s », une annonce est liée à plusieurs candidatures
+
     /**
      * @var int
      *
@@ -69,10 +80,6 @@ class Advert
      */
     private $image;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="OC\PlatformBundle\Entity\Category", cascade={"persist"})
-     */
-    private $categories;
 
     /**
      * Get id
@@ -260,5 +267,43 @@ class Advert
     public function getCategories()
     {
         return $this->categories;
+    }
+
+    /**
+     * Add application
+     *
+     * @param \OC\PlatformBundle\Entity\Application $application
+     *
+     * @return Advert
+     */
+    public function addApplication(\OC\PlatformBundle\Entity\Application $application)
+    {
+        $this->applications[] = $application;
+
+        // On lie l'annonce à la candidature
+        $application->setAdvert($this);
+
+
+        return $this;
+    }
+
+    /**
+     * Remove application
+     *
+     * @param \OC\PlatformBundle\Entity\Application $application
+     */
+    public function removeApplication(\OC\PlatformBundle\Entity\Application $application)
+    {
+        $this->applications->removeElement($application);
+    }
+
+    /**
+     * Get applications
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getApplications()
+    {
+        return $this->applications;
     }
 }

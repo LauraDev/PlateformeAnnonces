@@ -7,6 +7,7 @@ namespace OC\PlatformBundle\Controller;
 use OC\PlatformBundle\Entity\Advert;
 use OC\PlatformBundle\Entity\Image;
 use OC\PlatformBundle\Entity\Application;
+use OC\PlatformBundle\Entity\AdvertSkill;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -62,9 +63,12 @@ class AdvertController extends Controller
 
     public function addAction(Request $request)
     {
+        // On récupère l'EntityManager
+        $em = $this->getDoctrine()->getManager();
+
         // Création de l'entité Advert
         $advert = new Advert();
-        $advert->setTitle('Recherche développeur Symfony.');
+        $advert->setTitle('Recherche développeur Symfony');
         $advert->setAuthor('Alexandre');
         $advert->setContent("Nous recherchons un développeur Symfony débutant sur Lyon. Blabla…");
 
@@ -90,8 +94,25 @@ class AdvertController extends Controller
         $application1->setAdvert($advert);
         $application2->setAdvert($advert);
 
-        // On récupère l'EntityManager
-        $em = $this->getDoctrine()->getManager();
+        // On récupère toutes les compétences possibles
+        $listSkills = $em->getRepository('OCPlatformBundle:Skill')->findAll();
+
+        // Pour chaque compétence
+        foreach ($listSkills as $skill) {
+            // On crée une nouvelle « relation entre 1 annonce et 1 compétence »
+            $advertSkill = new AdvertSkill();
+
+            // On la lie à l'annonce, qui est ici toujours la même
+            $advertSkill->setAdvert($advert);
+            // On la lie à la compétence, qui change ici dans la boucle foreach
+            $advertSkill->setSkill($skill);
+
+            // Arbitrairement, on dit que chaque compétence est requise au niveau 'Expert'
+            $advertSkill->setLevel('Expert');
+
+            // Et bien sûr, on persiste cette entité de relation, propriétaire des deux autres relations
+            $em->persist($advertSkill);
+        }
 
         // Étape 1 : On « persiste » l'entité
         $em->persist($advert);
@@ -106,17 +127,6 @@ class AdvertController extends Controller
 
 
         if ($request->isMethod('POST')) {
-
-            // // Création de l'entité
-            // $advert = new Advert();
-            // $advert->setTitle('Recherche développeur Symfony.');
-            // $advert->setAuthor('Alexandre');
-            // $advert->setContent("Nous recherchons un développeur Symfony débutant sur Lyon. Blabla…");
-            
-            // // Ajout en DB
-            // $em = $this->getDoctrine()->getManager();
-            // $em->persist($advert);
-            // $em->flush();
             
             // Enregistrement dans session du message flash
             $request->getSession()->getFlashBag()->add('notice', 'Annonce bien enregistrée.');
@@ -226,5 +236,22 @@ class AdvertController extends Controller
         $em->flush();
 
         return new Response('OK');
+    }
+
+    public function purgeAction(Request $request, $days)
+    {
+        // On récupère le service
+        $purge = $this->container->get('oc_platform.purge');
+        $purge = $purge->purge($days);
+
+        $em = $this->getDoctrine()->getManager();
+        foreach ($purge as $toPurge) {
+            $em->remove($toPurge);
+        }
+            $em->flush();
+            $request->getSession()->getFlashBag()->add('notice', 'Annonces bien purgées.');
+        
+        
+        return $this->redirectToRoute('oc_platform_home');
     }
 }
