@@ -9,7 +9,7 @@
 {% block ocplatform_body %}
     <div>
         {# On affiche tous les messages flash dont le nom est « info » #}
-        {% for message in app.session.flashbag.get('notice') %}
+        {% for message in app.session.flashbag.get('info') %}
             <p class="alert alert-info"> Message flash : {{ message }}</p>
         {% endfor %}
     </div>
