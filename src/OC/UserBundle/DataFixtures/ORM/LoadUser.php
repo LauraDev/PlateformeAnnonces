@@ -31,6 +31,13 @@ class LoadUser implements FixtureInterface
             $manager->persist($user);
         }
 
+        $user2 = new User;
+        $user2->setUsername('lola');
+        $user2->setPassword('lola');
+        $user2->setSalt('');
+        $user2->setRoles(array('ROLE_AUTEUR'));
+        $manager->persist($user2);
+
         // On déclenche l'enregistrement
         $manager->flush();
     }

@@ -13,7 +13,7 @@ use OC\PlatformBundle\Form\AdvertEditType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 class AdvertController extends Controller
 {
@@ -62,6 +62,9 @@ class AdvertController extends Controller
         ));
     }
 
+    /**
+    * @Security("has_role('ROLE_AUTEUR')")
+    */
     public function addAction(Request $request)
     {
     // On crée un objet Advert
